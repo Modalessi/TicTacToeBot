@@ -254,6 +254,8 @@ def minimax(board, depth, isMaximizer, bot, human) :
 
           
   #test
+  #this one is to test gitlens
+  
 
 
 
