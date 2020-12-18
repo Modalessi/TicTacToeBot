@@ -258,7 +258,7 @@ def minimax(board, depth, isMaximizer, bot, human) :
 
 
 main()
-
+print("ohhh that is very cool hahah :)")
 
   
 
