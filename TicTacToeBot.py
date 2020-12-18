@@ -252,18 +252,10 @@ def minimax(board, depth, isMaximizer, bot, human) :
             bestValue = value
     return bestValue
 
-          
-  #test
-  #this one is to test gitlens
-  
+
+
+
 
 
 
 main()
-print("ohhh that is very cool hahah :)")
-
-  
-
-
-
-# this is just a comment removed the s
