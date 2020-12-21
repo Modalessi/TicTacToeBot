@@ -204,7 +204,7 @@ def bestMove(board , bot, human) :
       if board[r][j] != "X" and board[r][j] != "O" :
         boxNum = board[r][j]
         board[r][j] = bot
-        value = minimax(board, 0, False, bot, human)
+        value = minimax(board, False, bot, human)
         board[r][j] = boxNum
         if value > bestValue :
           bestValue = value
@@ -215,7 +215,7 @@ def bestMove(board , bot, human) :
 
 
 
-def minimax(board, depth, isMaximizer, bot, human) :
+def minimax(board, isMaximizer, bot, human) :
   #print(board)
   if checkWin(board) != "" or isTie(board):
     if checkWin(board) == human:
@@ -233,7 +233,7 @@ def minimax(board, depth, isMaximizer, bot, human) :
         if board[r][j] != "X" and board[r][j] != "O" :
           boxNum = board[r][j]
           board[r][j] = bot
-          value = minimax(board, depth + 1, False, bot, human)
+          value = minimax(board,False, bot, human)
           board[r][j] = boxNum
           if value > bestValue :
             bestValue = value
@@ -246,7 +246,7 @@ def minimax(board, depth, isMaximizer, bot, human) :
         if board[r][j] != "X" and board[r][j] != "O" :
           boxNum = board[r][j]
           board[r][j] = human
-          value = minimax(board, depth + 1, True, bot, human)
+          value = minimax(board, True, bot, human)
           board[r][j] = boxNum
           if value < bestValue :
             bestValue = value
