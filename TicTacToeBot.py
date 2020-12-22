@@ -89,7 +89,7 @@ class Player :
 
     for move in board.allAvaliableMoves(aiPlayer) :
       # print(move.board)
-      value = minimax(move, False, aiPlayer, humanPlayer)
+      value = minimax(move, -100, 100, False, aiPlayer, humanPlayer)
       # print("value: ", value)
       if value > bestScore :
         bestScore = value
@@ -163,7 +163,6 @@ def main() :
   human = humanChoic()
   starter = starterChoic()
 
-  print(human)
   humanPlayer = Player(human)
   aiPlayer = Player("O") if humanPlayer.symbol == "X" else Player("X")
 
@@ -221,7 +220,7 @@ def main() :
 
 
 
-def minimax(board, isMaximizer, aiPlayer, humanPlayer) :
+def minimax(board, alpha, beta, isMaximizer, aiPlayer, humanPlayer) :
   # print(board.board)
   if board.checkWin() != "" or board.isTie() :
     if board.checkWin() == humanPlayer.symbol:
@@ -235,15 +234,21 @@ def minimax(board, isMaximizer, aiPlayer, humanPlayer) :
   if isMaximizer :
     bestValue = -100
     for move in board.allAvaliableMoves(aiPlayer) :
-      value = minimax(move, False, aiPlayer, humanPlayer)
+      value = minimax(move, alpha, beta, False, aiPlayer, humanPlayer)
       bestValue = max(value, bestValue)
+      alpha = max(alpha, value)
+      if beta <= alpha :
+        break
     return bestValue
 
   else :
     bestValue = 100
     for move in board.allAvaliableMoves(humanPlayer) :
-      value = minimax(move, True, aiPlayer, humanPlayer)
+      value = minimax(move, alpha, beta, True, aiPlayer, humanPlayer)
       bestValue = min(value, bestValue)
+      beta = min(beta, value)
+      if beta <= alpha :
+        break
     return bestValue
 
 
