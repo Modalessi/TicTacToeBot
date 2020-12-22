@@ -1,65 +1,109 @@
 
-
-def creatBoard() :
-  board = [
-    ["1","2","3"],
-    ["4","5","6"],
-    ["7","8","9"]
-  ]
-
-  return board
+from copy import deepcopy
 
 
+class Board :
+  def __init__(self, board = [["1","2","3"], ["4","5","6"], ["7","8","9"]]) :
+    self.board = board
 
 
-def play(player,board,x,y) :
-  board[x][y] = player
-  return board
+  def allAvaliableMoves(self, player) :
+    availableMoves = []
+    if player.symbol == "X" :
+      for row in range(3) :
+        for columen in range(3) :
+          if self.board[row][columen] != "X" and self.board[row][columen] != "O" :
+            moveBoard = deepcopy(self.board)
+            moveBoard[row][columen] = "X"
+            move = moveBoard
+            availableMoves.append(Board(board = move))
+    else :
+      for row in range(3) :
+        for columen in range(3) :
+          if self.board[row][columen] != "X" and self.board[row][columen] != "O" :
+            moveBoard = deepcopy(self.board)
+            moveBoard[row][columen] = "O"
+            move = moveBoard
+            availableMoves.append(Board(board = move))
+
+    return availableMoves
 
   
-def checkWin(board) :
-  # check horzintals
-  first = ""
-  for r in board :
-    first = r[0]
-    if r[1] == first and r[2] == first :
+  def show(self) :
+    for r in self.board :
+      print("     %s     |     %s     |     %s     "%(r[0],r[1],r[2]))
+
+
+  def checkWin(self) :
+    # check horzintals
+    first = ""
+    for r in self.board :
+      first = r[0]
+      if r[1] == first and r[2] == first :
+        return first
+
+    # check postive slop
+    first = self.board[2][0]
+    if self.board[1][1] == first and self.board[0][2] == first :
       return first
 
-  # check postive slop
-  first = board[2][0]
-  if board[1][1] == first and board[0][2] == first :
-    return first
-
     
-  # check neagative slop
-  first = board[0][0]
-  if board[1][1] == first and board[2][2] == first:
-    return first
+    # check neagative slop
+    first = self.board[0][0]
+    if self.board[1][1] == first and self.board[2][2] == first:
+      return first
 
 
-  # check columens
-  for i in range(3) :
-    columen = []
-    for j in range(3) :
-      columen.append(board[j][i])
-    
-    if columen[0] == columen[1] == columen[2] :
-      return columen[0]
+    # check columens
+    for i in range(3) :
+      columen = []
+      for j in range(3) :
+        columen.append(self.board[j][i])
+      if columen[0] == columen[1] == columen[2] :
+        return columen[0]
+
+    return ""
+
+  def isTie(self) :
+    for r in self.board :
+      for spot in r :
+        if spot != "X" and spot != "O" :
+          return False
+
+    return True
 
 
 
-  return ""
+class Player : 
+  def __init__(self, symbol) :
+    self.symbol = symbol
+
+  def playMove(self, move, board) :
+    board.board[move[0]][move[1]] = self.symbol
 
 
 
-def showBoard(board) :
-  for r in board :
-    print("     %s     |     %s     |     %s     "%(r[0],r[1],r[2]))
+  def playBestMove(self, board, humanPlayer, aiPlayer) :
+    bestScore = -100
+    bestMove = None
+
+    for move in board.allAvaliableMoves(aiPlayer) :
+      # print(move.board)
+      value = minimax(move, False, aiPlayer, humanPlayer)
+      # print("value: ", value)
+      if value > bestScore :
+        bestScore = value
+        bestMove = move
+
+    board.board = bestMove.board
+
+
+  
 
 
 
 def isAvailableMove(board, x, y) :
-  if board[x][y] != "X" and board[x][y] != "O" :
+  if board.board[x][y] != "X" and board.board[x][y] != "O" :
     return True
   else :
     return False
@@ -103,18 +147,6 @@ def validateInput(string) :
 
 
 
-
-
-def isTie(board) :
-
-  for r in board :
-    for spot in r :
-      if spot != "X" and spot != "O" :
-        return False
-
-  return True
-
-
 def starterChoic() :
   starter = input("enter who do you ant to start X or O: ")
   while starter.upper() != "X" and starter.upper() != "O" :
@@ -126,31 +158,30 @@ def starterChoic() :
 
 
 def main() :
-  board = creatBoard()
+  board = Board()
 
   human = humanChoic()
   starter = starterChoic()
 
-  bot = "X" if human == "O" else "O"
+  print(human)
+  humanPlayer = Player(human)
+  aiPlayer = Player("O") if humanPlayer.symbol == "X" else Player("X")
+
   print(":::::::: GAME STARTED ::::::::")
 
+  while board.checkWin() == "" and not board.isTie() :
 
-  while checkWin(board) == "" and not isTie(board) :
-
-
-    if starter == bot :
-      aiTurn(board, bot, human)
-      if checkWin(board) != "" or isTie(board) :
+    if starter == aiPlayer.symbol :
+      aiPlayer.playBestMove(board, humanPlayer, aiPlayer)
+      if board.checkWin() != "" or board.isTie() :
         break
-      showBoard(board)
+      board.show()
     else :
-      showBoard(board)
+      board.show()
 
       
 
-
     flag = True
-
     while flag :
       move = input("enter where you want to play %s:"%(human))
       
@@ -165,62 +196,37 @@ def main() :
       else :
         print("not Available Move, pick another one")
 
-    play(human,board,int(move[0]),int(move[1]))
-    if checkWin(board) != "" or isTie(board)  :
+
+    move = (int(move[0]), int(move[1]))
+    humanPlayer.playMove(move, board)
+    if board.checkWin() != "" or board.isTie()  :
       break
 
-    if starter == human :
-      aiTurn(board, bot, human)
-      if checkWin(board) != "" or isTie(board) :
+    if starter == humanPlayer.symbol :
+      aiPlayer.playBestMove(board, humanPlayer, aiPlayer)
+      if board.checkWin() != "" or board.isTie() :
         break
 
-    if checkWin(board) != "" or isTie(board)  :
+    if board.checkWin() != "" or board.isTie()  :
       break
   
 
   print(":::::::: END OF THE GAME ::::::::")
-  showBoard(board)
-  if checkWin(board) == "X" or checkWin(board) == "O" :
-    winner = checkWin(board)
+  board.show()
+  if board.checkWin() == "X" or board.checkWin() == "O" :
+    winner = board.checkWin()
     print("the winner is ", winner)
   else :
     print("no one wins, it is a tie")
 
 
 
-
-
-def aiTurn(board, botChar, human) :
-  aiMove = bestMove(board, botChar, human)
-  board[aiMove[0]][aiMove[1]] = botChar
-
-
-
-def bestMove(board , bot, human) :
-  bestValue = -100
-  bestMove = None
-  for r in range(3) :
-    for j in range(3) :
-      if board[r][j] != "X" and board[r][j] != "O" :
-        boxNum = board[r][j]
-        board[r][j] = bot
-        value = minimax(board, False, bot, human)
-        board[r][j] = boxNum
-        if value > bestValue :
-          bestValue = value
-          bestMove = (r,j)
-  
-  return bestMove
-
-
-
-
-def minimax(board, isMaximizer, bot, human) :
-  #print(board)
-  if checkWin(board) != "" or isTie(board):
-    if checkWin(board) == human:
+def minimax(board, isMaximizer, aiPlayer, humanPlayer) :
+  # print(board.board)
+  if board.checkWin() != "" or board.isTie() :
+    if board.checkWin() == humanPlayer.symbol:
       return -1
-    elif checkWin(board) == bot :
+    elif board.checkWin() == aiPlayer.symbol :
       return 1
     else :
       return 0
@@ -228,34 +234,17 @@ def minimax(board, isMaximizer, bot, human) :
 
   if isMaximizer :
     bestValue = -100
-    for r in range(3) :
-      for j in range(3) :
-        if board[r][j] != "X" and board[r][j] != "O" :
-          boxNum = board[r][j]
-          board[r][j] = bot
-          value = minimax(board,False, bot, human)
-          board[r][j] = boxNum
-          if value > bestValue :
-            bestValue = value
+    for move in board.allAvaliableMoves(aiPlayer) :
+      value = minimax(move, False, aiPlayer, humanPlayer)
+      bestValue = max(value, bestValue)
     return bestValue
 
   else :
     bestValue = 100
-    for r in range(3) :
-      for j in range(3) :
-        if board[r][j] != "X" and board[r][j] != "O" :
-          boxNum = board[r][j]
-          board[r][j] = human
-          value = minimax(board, True, bot, human)
-          board[r][j] = boxNum
-          if value < bestValue :
-            bestValue = value
+    for move in board.allAvaliableMoves(humanPlayer) :
+      value = minimax(move, True, aiPlayer, humanPlayer)
+      bestValue = min(value, bestValue)
     return bestValue
-
-
-
-
-
 
 
 main()
