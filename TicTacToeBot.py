@@ -1,6 +1,5 @@
-
 from copy import deepcopy
-
+from tkinter import *
 
 class Board :
   def __init__(self, board = [["1","2","3"], ["4","5","6"], ["7","8","9"]]) :
@@ -99,9 +98,6 @@ class Player :
 
 
   
-
-
-
 def isAvailableMove(board, x, y) :
   if board.board[x][y] != "X" and board.board[x][y] != "O" :
     return True
@@ -156,67 +152,134 @@ def starterChoic() :
   return starter.upper()
 
 
+def creatUIBoard(window ,board, humanPlayer, aiPlayer) :
+
+    topLeftLable = Button(window, text = board.board[0][0], command = lambda: buttonTouched(topLeftLable, humanPlayer, aiPlayer, board, window))
+    topCenterLable = Button(window, text = board.board[0][1], command = lambda: buttonTouched(topCenterLable, humanPlayer, aiPlayer, board, window))
+    topRightLable = Button(window, text = board.board[0][2], command = lambda: buttonTouched(topRightLable, humanPlayer, aiPlayer, board, window))
+
+    medumLeftLable = Button(window, text = board.board[1][0], command = lambda: buttonTouched(medumLeftLable, humanPlayer, aiPlayer, board, window))
+    medumCenterLable = Button(window, text = board.board[1][1], command = lambda: buttonTouched(medumCenterLable, humanPlayer, aiPlayer, board, window))
+    medumRightLable = Button(window, text = board.board[1][2], command = lambda: buttonTouched(medumRightLable, humanPlayer, aiPlayer, board, window))
+
+    bottomLeftLable = Button(window, text = board.board[2][0], command = lambda: buttonTouched(bottomLeftLable, humanPlayer, aiPlayer, board, window))
+    bottomCenterLable = Button(window, text = board.board[2][1], command = lambda: buttonTouched(bottomCenterLable, humanPlayer, aiPlayer, board, window))
+    bottomRightLable = Button(window, text = board.board[2][2], command = lambda: buttonTouched(bottomRightLable, humanPlayer, aiPlayer, board, window))
+
+    UIBoard = [[topLeftLable, topCenterLable, topRightLable], [medumLeftLable, medumCenterLable, medumRightLable], [bottomLeftLable, bottomCenterLable, bottomRightLable]]
+    
+    for row in range(3) :
+        for label in range(3) :
+            UIBoard[row][label].config(width = 5, height = 3)
+            UIBoard[row][label].config(font=("Courier", 44))
+            UIBoard[row][label].grid(row = row, column = label)
+
+
+
+def buttonTouched(button, humanPlayer, aiPlayer, board, window) :
+    print("HI")
+    move = translateMove(button["text"])
+    move = (int(move[0]), int(move[1]))
+    board.board[move[0]][move[1]] = humanPlayer.symbol
+    button["text"] = humanPlayer.symbol
+    if board.checkWin() != "" or board.isTie()  :
+      for w in window.winfo_children():
+        w.configure(state="disabled")
+      print("hello")
+      if board.checkWin() == "X" or board.checkWin() == "O" :
+        winner = board.checkWin()
+        label = Label(window, text = f"the winner is {winner}")
+        label.config(font= ("Courier", 20) )
+        label.grid(row = 4,column = 1)
+      else :
+        label = Label(window, text = "no one wins, it is a tie")
+        label.config(font=("Courier", 20))
+        label.grid(row = 4,column = 1)
+        return 0
+    aiPlayer.playBestMove(board, humanPlayer, aiPlayer)
+    creatUIBoard(window, board, humanPlayer, aiPlayer)
+    
+    if board.checkWin() != "" or board.isTie()  :
+      for w in window.winfo_children():
+        w.configure(state="disabled")
+      print("hello")
+      if board.checkWin() == "X" or board.checkWin() == "O" :
+        winner = board.checkWin()
+        label = Label(window, text = f"the winner is {winner}")
+        label.config(font= ("Courier", 20) )
+        label.grid(row = 4,column = 1)
+      else :
+        label = Label(window, text = "no one wins, it is a tie")
+        label.config(font=("Courier", 20))
+        label.grid(row = 4,column = 1)
+      
+
+
+
+
+
 
 def main() :
   board = Board()
+  window = Tk()
+  humanPlayer = Player("X")
+  aiPlayer = Player("O")
+  creatUIBoard(window, board, humanPlayer, aiPlayer)
+#  #if humanPlayer.symbol == "X" else Player("X")
 
-  human = humanChoic()
-  starter = starterChoic()
+#   print(":::::::: GAME STARTED ::::::::")
 
-  humanPlayer = Player(human)
-  aiPlayer = Player("O") if humanPlayer.symbol == "X" else Player("X")
+#   while board.checkWin() == "" and not board.isTie() :
 
-  print(":::::::: GAME STARTED ::::::::")
-
-  while board.checkWin() == "" and not board.isTie() :
-
-    if starter == aiPlayer.symbol :
-      aiPlayer.playBestMove(board, humanPlayer, aiPlayer)
-      if board.checkWin() != "" or board.isTie() :
-        break
-      board.show()
-    else :
-      board.show()
+#     if starter == aiPlayer.symbol :
+#       aiPlayer.playBestMove(board, humanPlayer, aiPlayer)
+#       if board.checkWin() != "" or board.isTie() :
+#         break
+#       board.show()
+#     else :
+#       board.show()
 
       
 
-    flag = True
-    while flag :
-      move = input("enter where you want to play %s:"%(human))
+#     flag = True
+#     while flag :
+#       move = input("enter where you want to play %s:"%(human))
       
-      while not validateInput(move) :
-        print("invalid input, please select number from the board above")
-        move = input("enter where you want to play :")
+#       while not validateInput(move) :
+#         print("invalid input, please select number from the board above")
+#         move = input("enter where you want to play :")
 
-      move = translateMove(move)
+#       move = translateMove(move)
 
-      if isAvailableMove(board, int(move[0]), int(move[1])) :
-        flag = False
-      else :
-        print("not Available Move, pick another one")
+#       if isAvailableMove(board, int(move[0]), int(move[1])) :
+#         flag = False
+#       else :
+#         print("not Available Move, pick another one")
 
 
-    move = (int(move[0]), int(move[1]))
-    humanPlayer.playMove(move, board)
-    if board.checkWin() != "" or board.isTie()  :
-      break
+#     move = (int(move[0]), int(move[1]))
+#     humanPlayer.playMove(move, board)
+#     if board.checkWin() != "" or board.isTie()  :
+#       break
 
-    if starter == humanPlayer.symbol :
-      aiPlayer.playBestMove(board, humanPlayer, aiPlayer)
-      if board.checkWin() != "" or board.isTie() :
-        break
+#     if starter == humanPlayer.symbol :
+#       aiPlayer.playBestMove(board, humanPlayer, aiPlayer)
+#       if board.checkWin() != "" or board.isTie() :
+#         break
 
-    if board.checkWin() != "" or board.isTie()  :
-      break
+#     if board.checkWin() != "" or board.isTie()  :
+#       break
   
 
-  print(":::::::: END OF THE GAME ::::::::")
-  board.show()
-  if board.checkWin() == "X" or board.checkWin() == "O" :
-    winner = board.checkWin()
-    print("the winner is ", winner)
-  else :
-    print("no one wins, it is a tie")
+#   print(":::::::: END OF THE GAME ::::::::")
+#   board.show()
+#   if board.checkWin() == "X" or board.checkWin() == "O" :
+#     winner = board.checkWin()
+#     print("the winner is ", winner)
+#   else :
+#     print("no one wins, it is a tie")
+  window.mainloop()
+
 
 
 
